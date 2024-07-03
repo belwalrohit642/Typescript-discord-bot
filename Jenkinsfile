@@ -10,15 +10,22 @@ metadata:
 spec:
   containers:
   - name: jnlp
-    workingDir: /home/jenkins
+    image: jenkins/inbound-agent
+    volumeMounts:
+    - name: jenkins-docker-cfg
+      mountPath: /home/jenkins/.docker
   - name: nodejs
     image: node:16
-    command: ["/bin/sh", "-c", "cat"]
     tty: true
+    volumeMounts:
+    - name: jenkins-docker-cfg
+      mountPath: /root/.docker
   - name: sonarqube
     image: openjdk:17
-    command: ["/bin/sh", "-c", "cat"]
     tty: true
+    volumeMounts:
+    - name: jenkins-docker-cfg
+      mountPath: /root/.docker
   volumes:
   - name: jenkins-docker-cfg
     projected:
@@ -40,6 +47,7 @@ spec:
         stage('Checkout') {
             steps {
                 echo "Checking out code"
+                // Uncomment and adjust the following checkout step based on your Git repository setup
                 // checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/belwalrohit642/nodejs-ci-cd-project.git']]])
             }
         }
@@ -50,6 +58,7 @@ spec:
                     echo "Building and testing"
                     sh 'ls -ltr'
                     sh 'npm install'
+                    // Uncomment and adjust the npm test command based on your project setup
                     // sh 'npm test'
                 }
             }
