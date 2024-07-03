@@ -47,7 +47,6 @@ spec:
         stage('Checkout') {
             steps {
                 echo "Checking out code"
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/belwalrohit642/nodejs-ci-cd-project.git']]])
             }
         }
 
