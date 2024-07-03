@@ -12,19 +12,13 @@ spec:
   - name: jnlp
     workingDir: /home/jenkins
   - name: nodejs
-    image: node:16 # Standard Node.js image
+    image: node:16
     command: ["/bin/sh", "-c", "cat"]
     tty: true
-    volumeMounts:
-    - name: jenkins-docker-cfg
-      mountPath: /kaniko/.docker
   - name: sonarqube
-    image: openjdk:17-slim  # Image with Java for SonarQube
-    command: ["/bin/sh", "-c", "cat"]
+    image: openjdk:17-slim
+    command: ["/bin/sh", "-c", "apt-get update && apt-get install -y openjdk-17-jdk && cat"]
     tty: true
-    volumeMounts:
-    - name: jenkins-docker-cfg
-      mountPath: /kaniko/.docker
   volumes:
   - name: jenkins-docker-cfg
     projected:
@@ -73,7 +67,7 @@ spec:
         stage('SonarQube analysis') {
             environment {
                 SCANNER_HOME = tool 'SonarQubeScanner'
-                JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+                JAVA_HOME = "/usr/lib/jvm/java-17-openjdk"
                 PATH = "$JAVA_HOME/bin:$PATH"
             }
             steps {
@@ -81,8 +75,8 @@ spec:
                     withSonarQubeEnv('SonarQube') {
                         echo "Running SonarQube analysis"
                         sh '''
-                            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-                            export PATH=$JAVA_HOME/bin:$PATH
+                            echo "JAVA_HOME=$JAVA_HOME"
+                            echo "PATH=$PATH"
                             ${SCANNER_HOME}/bin/sonar-scanner
                         '''
                     }
