@@ -27,7 +27,7 @@ spec:
     - name: jenkins-docker-cfg
       mountPath: /kaniko/.docker
   - name: sonarscanner
-    image: sonarsource/sonar-scanner-cli:4.6
+    image: sonarsource/sonar-scanner-cli:4.6-jdk17
     command: ["/bin/sh", "-c", "cat"]  # Keep the container running
     tty: true
   volumes:
