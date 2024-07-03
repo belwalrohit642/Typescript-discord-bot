@@ -16,8 +16,8 @@ spec:
     command: ["/bin/sh", "-c", "cat"]
     tty: true
   - name: sonarqube
-    image: openjdk:17-slim
-    command: ["/bin/sh", "-c", "apt-get update && apt-get install -y openjdk-17-jdk && cat"]
+    image: openjdk:17
+    command: ["/bin/sh", "-c", "cat"]
     tty: true
   volumes:
   - name: jenkins-docker-cfg
