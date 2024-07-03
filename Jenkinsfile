@@ -74,7 +74,6 @@ spec:
                         sh 'sonar-scanner \
                             -Dsonar.login=$SONAR_AUTH_TOKEN \
                             -Dsonar.host.url=$SONAR_URL \
-                            // -Dsonar.projectKey=my_project \
                             -Dsonar.sources=./src'
                     }
                 }
