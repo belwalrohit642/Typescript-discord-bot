@@ -26,6 +26,10 @@ spec:
     volumeMounts:
     - name: jenkins-docker-cfg
       mountPath: /kaniko/.docker
+  - name: sonarscanner
+    image: sonarsource/sonar-scanner-cli:4.6
+    command: ["/bin/sh", "-c", "cat"]  # Keep the container running
+    tty: true
   volumes:
   - name: jenkins-docker-cfg
     projected:
@@ -64,15 +68,16 @@ spec:
 
         stage('Static Code Analysis') {
             steps {
-                                container('nodejs') {
+                container('sonarscanner') {
                     echo "Running static code analysis"
-                    sh 'ls -l /usr/local/lib/node_modules/sonar-scanner/bin'
                     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                        sh 'npm install -g sonar-scanner'
-                        sh 'chmod +x /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner' 
-                        sh "sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL"
+                        sh 'sonar-scanner \
+                            -Dsonar.login=$SONAR_AUTH_TOKEN \
+                            -Dsonar.host.url=$SONAR_URL \
+                            // -Dsonar.projectKey=my_project \
+                            -Dsonar.sources=./src'
+                    }
                 }
-                                }
             }
         }
     }
