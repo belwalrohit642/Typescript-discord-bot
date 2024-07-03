@@ -66,6 +66,7 @@ spec:
             steps {
                                 container('nodejs') {
                     echo "Running static code analysis"
+                    sh 'ls -l /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner'
                     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
                         sh 'npm install -g sonar-scanner'
                         sh 'chmod +x /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner' 
