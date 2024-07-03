@@ -56,8 +56,8 @@ spec:
                 container('nodejs') {
                     echo "Building and testing"
                     sh 'ls -ltr'
-                    sh 'cd path/to/your-nodejs-app && npm install'
-                    sh 'cd path/to/your-nodejs-app && npm test'
+                    sh 'npm install'
+                    sh 'npm test'
                 }
             }
         }
