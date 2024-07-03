@@ -10,22 +10,22 @@ metadata:
 spec:
   containers:
   - name: jnlp
-    image: jenkins/inbound-agent
+    workingDir: /home/jenkins
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    imagePullPolicy: Always
+    command: ["/busybox/cat"]
+    tty: true
     volumeMounts:
     - name: jenkins-docker-cfg
-      mountPath: /home/jenkins/.docker
+      mountPath: /kaniko/.docker
   - name: nodejs
     image: node:16
+    command: ["/bin/sh", "-c", "cat"]  # Keep the container running
     tty: true
     volumeMounts:
     - name: jenkins-docker-cfg
-      mountPath: /root/.docker
-  - name: sonarqube
-    image: openjdk:17
-    tty: true
-    volumeMounts:
-    - name: jenkins-docker-cfg
-      mountPath: /root/.docker
+      mountPath: /kaniko/.docker
   volumes:
   - name: jenkins-docker-cfg
     projected:
@@ -47,7 +47,6 @@ spec:
         stage('Checkout') {
             steps {
                 echo "Checking out code"
-                // Uncomment and adjust the following checkout step based on your Git repository setup
                 // checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/belwalrohit642/nodejs-ci-cd-project.git']]])
             }
         }
@@ -58,7 +57,6 @@ spec:
                     echo "Building and testing"
                     sh 'ls -ltr'
                     sh 'npm install'
-                    // Uncomment and adjust the npm test command based on your project setup
                     // sh 'npm test'
                 }
             }
@@ -67,27 +65,10 @@ spec:
         stage('Static Code Analysis') {
             steps {
                 container('nodejs') {
-                    echo "Installing SonarQube Scanner"
-                    sh 'npm install -g sonar-scanner'
-                }
-            }
-        }
-
-        stage('SonarQube analysis') {
-            environment {
-                SCANNER_HOME = tool 'SonarQubeScanner'
-                JAVA_HOME = "/usr/lib/jvm/java-17-openjdk"
-                PATH = "$JAVA_HOME/bin:$PATH"
-            }
-            steps {
-                container('sonarqube') {
-                    withSonarQubeEnv('SonarQube') {
-                        echo "Running SonarQube analysis"
-                        sh '''
-                            echo "JAVA_HOME=$JAVA_HOME"
-                            echo "PATH=$PATH"
-                            ${SCANNER_HOME}/bin/sonar-scanner
-                        '''
+                    echo "Running static code analysis"
+                    withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                        sh 'npm install -g sonar-scanner'
+                        sh "sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL"
                     }
                 }
             }
