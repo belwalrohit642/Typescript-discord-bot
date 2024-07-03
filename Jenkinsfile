@@ -71,19 +71,18 @@ spec:
             }
         }
 
-        stage('SonarQube Analysis') {
+     stage('SonarQube analysis') {
             environment {
-                SCANNER_HOME = tool 'SonarQubeScanner'
+                SCANNER_HOME = tool 'SonarQubeScanner'    
             }
             steps {
                 container('nodejs') {
-                    echo "Running SonarQube analysis"
-                    withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
-                        sh 'npm install -g sonar-scanner'
-                        sh 'sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
+                    withSonarQubeEnv('SonarQube') {
+                        echo "Running SonarQube analysis"
+                        sh "${SCANNER_HOME}/bin/sonar-scanner"
                     }
                 }
             }
-        }
+     }
     }
 }
