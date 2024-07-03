@@ -20,8 +20,8 @@ spec:
     - name: jenkins-docker-cfg
       mountPath: /kaniko/.docker
   - name: nodejs
-    image: node:16
-    command: ["/bin/sh", "-c", "cat"]  # Keep the container running
+    image: circleci/openjdk:17-node-browsers  # Use pre-built image with Node.js and Java
+    command: ["/bin/sh", "-c", "cat"]
     tty: true
     volumeMounts:
     - name: jenkins-docker-cfg
@@ -47,6 +47,7 @@ spec:
         stage('Checkout') {
             steps {
                 echo "Checking out code"
+                // checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/belwalrohit642/nodejs-ci-cd-project.git']]])
             }
         }
 
@@ -56,7 +57,6 @@ spec:
                     echo "Building and testing"
                     sh 'ls -ltr'
                     sh 'npm install'
-                    // Uncomment the following line if you want to run tests
                     // sh 'npm test'
                 }
             }
@@ -71,9 +71,11 @@ spec:
             }
         }
 
-     stage('SonarQube analysis') {
+        stage('SonarQube analysis') {
             environment {
-                SCANNER_HOME = tool 'SonarQubeScanner'    
+                SCANNER_HOME = tool 'SonarQubeScanner'
+                JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+                PATH = "$JAVA_HOME/bin:$PATH"
             }
             steps {
                 container('nodejs') {
@@ -83,6 +85,6 @@ spec:
                     }
                 }
             }
-     }
+        }
     }
 }
