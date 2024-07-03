@@ -11,16 +11,15 @@ spec:
   containers:
   - name: jnlp
     workingDir: /home/jenkins
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:debug
-    imagePullPolicy: Always
-    command: ["/busybox/cat"]
+  - name: nodejs
+    image: node:16 # Standard Node.js image
+    command: ["/bin/sh", "-c", "cat"]
     tty: true
     volumeMounts:
     - name: jenkins-docker-cfg
       mountPath: /kaniko/.docker
-  - name: nodejs
-    image: circleci/openjdk:17-node-browsers  # Use pre-built image with Node.js and Java
+  - name: sonarqube
+    image: openjdk:17-slim  # Image with Java for SonarQube
     command: ["/bin/sh", "-c", "cat"]
     tty: true
     volumeMounts:
@@ -78,10 +77,14 @@ spec:
                 PATH = "$JAVA_HOME/bin:$PATH"
             }
             steps {
-                container('nodejs') {
+                container('sonarqube') {
                     withSonarQubeEnv('SonarQube') {
                         echo "Running SonarQube analysis"
-                        sh "${SCANNER_HOME}/bin/sonar-scanner"
+                        sh '''
+                            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+                            export PATH=$JAVA_HOME/bin:$PATH
+                            ${SCANNER_HOME}/bin/sonar-scanner
+                        '''
                     }
                 }
             }
