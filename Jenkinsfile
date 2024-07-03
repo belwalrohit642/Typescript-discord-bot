@@ -47,7 +47,7 @@ spec:
         stage('Checkout') {
             steps {
                 echo "Checking out code"
-                // checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/belwalrohit642/nodejs-ci-cd-project.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/belwalrohit642/nodejs-ci-cd-project.git']]])
             }
         }
 
@@ -57,6 +57,7 @@ spec:
                     echo "Building and testing"
                     sh 'ls -ltr'
                     sh 'npm install'
+                    // Uncomment the following line if you want to run tests
                     // sh 'npm test'
                 }
             }
@@ -71,29 +72,19 @@ spec:
             }
         }
 
-        // stage('SonarQube analysis') {
-        //     environment {
-        //         SCANNER_HOME = tool 'SonarQubeScanner'    
-        //     }
-        //     steps {
-        //         container('nodejs') {
-        //             withSonarQubeEnv('SonarQube') {
-        //                 echo "Running SonarQube analysis"
-        //                 sh "${SCANNER_HOME}/bin/sonar-scanner"
-        //             }
-        //         }
-        //     }
-        // }
-                stage('Static Code Analysis') {
+        stage('SonarQube Analysis') {
+            environment {
+                SCANNER_HOME = tool 'SonarQubeScanner'
+            }
             steps {
                 container('nodejs') {
-                    echo "Running static code analysis"
+                    echo "Running SonarQube analysis"
                     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
                         sh 'npm install -g sonar-scanner'
-                        sh "sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL"
+                        sh 'sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL'
                     }
                 }
             }
         }
-    
+    }
 }
