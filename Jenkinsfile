@@ -71,15 +71,26 @@ spec:
             }
         }
 
-        stage('SonarQube analysis') {
-            environment {
-                SCANNER_HOME = tool 'SonarQubeScanner'    
-            }
+        // stage('SonarQube analysis') {
+        //     environment {
+        //         SCANNER_HOME = tool 'SonarQubeScanner'    
+        //     }
+        //     steps {
+        //         container('nodejs') {
+        //             withSonarQubeEnv('SonarQube') {
+        //                 echo "Running SonarQube analysis"
+        //                 sh "${SCANNER_HOME}/bin/sonar-scanner"
+        //             }
+        //         }
+        //     }
+        // }
+                stage('Static Code Analysis') {
             steps {
                 container('nodejs') {
-                    withSonarQubeEnv('SonarQube') {
-                        echo "Running SonarQube analysis"
-                        sh "${SCANNER_HOME}/bin/sonar-scanner"
+                    echo "Running static code analysis"
+                    withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+                        sh 'npm install -g sonar-scanner'
+                        sh "sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL"
                     }
                 }
             }
