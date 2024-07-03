@@ -68,6 +68,7 @@ spec:
                     echo "Running static code analysis"
                     withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
                         sh 'npm install -g sonar-scanner'
+                        sh 'chmod +x /usr/local/lib/node_modules/sonar-scanner/bin/sonar-scanner' 
                         sh "sonar-scanner -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=$SONAR_URL"
                 }
                                 }
